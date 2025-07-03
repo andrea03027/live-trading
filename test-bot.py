@@ -19,8 +19,8 @@ def get_btt_ticker():
     if response.status_code == 200:
         data = response.json()
         last_price = data['lastPrice']
+        return last_price
         print("Prezzo attuale BTT/USDT:", last_price)
-        send_message(f"Prezzo attuale BTT/USDT: {last_price}")
     else:
         print("Errore nella richiesta:", response.status_code)
 
@@ -38,4 +38,4 @@ def send_message(chat_id, text):
 
 # Invia il messaggio a entrambi i chat_id
 for chat_id in chat_ids:
-    send_message(chat_id, message)
+    send_message(chat_id, get_btt_ticker())
