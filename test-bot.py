@@ -556,5 +556,4 @@ if __name__ == "__main__":
         ranked_live.to_csv("results_SOL/live_strategy_ranking.csv", index=False)
         apply_and_plot_best_live_strategy()
         print("Attesa 15 minuti per il prossimo aggiornamento...\n")
-        #time.sleep(900)
-        time.sleep(5)
+        time.sleep(900)
