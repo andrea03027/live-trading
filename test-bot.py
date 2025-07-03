@@ -528,20 +528,14 @@ def apply_and_plot_best_live_strategy():
             f"⏰ Orario: {latest_cross['timestamp'].strftime('%Y-%m-%d %H:%M')}\n"
             f"💰 Prezzo: {latest_cross['close']:.2f}"
         )
-    plt.title("🔍 Live Signals - SOL/USDT (Long/Short, incl. Open Trades)")
-    plt.xlabel("Time")
-    plt.ylabel("Price (USDT)")
-    plt.grid(True)
-    plt.savefig("grafico.png")
-    message = (
-            f"🔔 Segnale Live!\n"
-            f"Tipo posizione: {latest_cross['cross_type']}\n"
-            f"⏰ Orario: {latest_cross['timestamp'].strftime('%Y-%m-%d %H:%M')}\n"
-            f"💰 Prezzo: {latest_cross['close']:.2f}"
-        )
-    for chat_id in chat_ids:
-        send_telegram(chat_id, message)
-        send_telegram_photo(chat_id, "grafico.png", caption=message)
+        plt.title("🔍 Live Signals - SOL/USDT (Long/Short, incl. Open Trades)")
+        plt.xlabel("Time")
+        plt.ylabel("Price (USDT)")
+        plt.grid(True)
+        plt.savefig("grafico.png")
+        for chat_id in chat_ids:
+            send_telegram(chat_id, message)
+            send_telegram_photo(chat_id, "grafico.png", caption=message)
 
         color = 'green' if latest_cross['cross_type'] == 'Golden Cross' else 'red'
         label = f"{latest_cross['cross_type']}\n{latest_cross['timestamp'].strftime('%H:%M')}"
@@ -563,5 +557,4 @@ if __name__ == "__main__":
         ranked_live.to_csv("results_SOL/live_strategy_ranking.csv", index=False)
         apply_and_plot_best_live_strategy()
         print("Attesa 15 minuti per il prossimo aggiornamento...\n")
-        #time.sleep(900)
-        time.sleep(5)
+        time.sleep(900)
