@@ -9,8 +9,20 @@ chat_ids = [
     '514488413'
 ]
 
-# Messaggio da inviare
-message = "Ciao! Questo è un messaggio automatico dal bot."
+def get_btt_ticker():
+    url = "https://api.binance.com/api/v3/ticker/1hr"
+    params = {
+        "symbol": "BTTUSDT"
+    }
+    response = requests.get(url, params=params)
+    
+    if response.status_code == 200:
+        data = response.json()
+        last_price = data['lastPrice']
+        print("Prezzo attuale BTT/USDT:", last_price)
+        send_message(f"Prezzo attuale BTT/USDT: {last_price}")
+    else:
+        print("Errore nella richiesta:", response.status_code)
 
 def send_message(chat_id, text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
