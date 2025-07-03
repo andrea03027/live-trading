@@ -1,4 +1,6 @@
 import requests
+import ccxt
+import pandas as pd
 
 # Configura il tuo token del bot
 BOT_TOKEN = '7669555617:AAECVrKJ20HdbJPN7DzSDImh0LBTMGJCK18'
@@ -9,20 +11,18 @@ chat_ids = [
     '514488413'
 ]
 
-def get_btt_ticker():
-    url = "https://api.binance.com/api/v3/ticker/24hr"
-    params = {
-        "symbol": "BTTUSDT"
-    }
-    response = requests.get(url, params=params)
+def fetch_live_data(symbol, timeframe='1h', lookback_hours=72, limit=1000):
+    exch = ccxt.binance()
+    since = exch.milliseconds() - lookback_hours * 60 * 60 * 1000
+    try:
+        ohlcv = exch.fetch_ohlcv(symbol, timeframe=timeframe, since=since, limit=limit)
+    except Exception as e:
+        print(f"Errore fetch OHLCV: {e}")
+        return None
     
-    if response.status_code == 200:
-        data = response.json()
-        last_price = data['lastPrice']
-        return last_price
-        print("Prezzo attuale BTT/USDT:", last_price)
-    else:
-        print("Errore nella richiesta:", response.status_code)
+    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    return df
 
 def send_message(chat_id, text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -38,4 +38,4 @@ def send_message(chat_id, text):
 
 # Invia il messaggio a entrambi i chat_id
 for chat_id in chat_ids:
-    send_message(chat_id, get_btt_ticker())
+    send_message(chat_id, fetch_live_data('SOL/USDT', timeframe='1h', lookback_hours=72))
