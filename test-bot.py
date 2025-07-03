@@ -530,7 +530,7 @@ def apply_and_plot_best_live_strategy():
         )
     plt.savefig("grafico.png")
     for chat_id in chat_ids:
-        send_message(chat_id, message)
+        send_telegram(chat_id, message)
         send_telegram_photo(chat_id, "grafico.png", caption=message)
 
         color = 'green' if latest_cross['cross_type'] == 'Golden Cross' else 'red'
