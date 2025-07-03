@@ -528,6 +528,10 @@ def apply_and_plot_best_live_strategy():
             f"⏰ Orario: {latest_cross['timestamp'].strftime('%Y-%m-%d %H:%M')}\n"
             f"💰 Prezzo: {latest_cross['close']:.2f}"
         )
+    plt.title("🔍 Live Signals - SOL/USDT (Long/Short, incl. Open Trades)")
+    plt.xlabel("Time")
+    plt.ylabel("Price (USDT)")
+    plt.grid(True)
     plt.savefig("grafico.png")
     message = (
             f"🔔 Segnale Live!\n"
@@ -546,12 +550,9 @@ def apply_and_plot_best_live_strategy():
             latest_cross['timestamp'], latest_cross['close'], label,
             color=color, fontsize=8, ha='left', va='bottom', rotation=90
         )
-    plt.title("🔍 Live Signals - SOL/USDT (Long/Short, incl. Open Trades)")
-    plt.xlabel("Time")
-    plt.ylabel("Price (USDT)")
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
+    
+    #plt.legend()
+    #plt.tight_layout()
     #plt.show()
     #plt.close()
 
