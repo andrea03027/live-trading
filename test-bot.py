@@ -1,12 +1,12 @@
 import requests
 
 # Configura il tuo token del bot
-BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE'
+BOT_TOKEN = '7669555617:AAECVrKJ20HdbJPN7DzSDImh0LBTMGJCK18'
 
 # Inserisci i due chat_id a cui vuoi inviare il messaggio
 chat_ids = [
-    'CHAT_ID_1',
-    'CHAT_ID_2'
+    '132642281',
+    '514488413'
 ]
 
 # Messaggio da inviare
