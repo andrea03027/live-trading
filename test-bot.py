@@ -529,6 +529,12 @@ def apply_and_plot_best_live_strategy():
             f"💰 Prezzo: {latest_cross['close']:.2f}"
         )
     plt.savefig("grafico.png")
+    message = (
+            f"🔔 Segnale Live!\n"
+            f"Tipo posizione: {latest_cross['cross_type']}\n"
+            f"⏰ Orario: {latest_cross['timestamp'].strftime('%Y-%m-%d %H:%M')}\n"
+            f"💰 Prezzo: {latest_cross['close']:.2f}"
+        )
     for chat_id in chat_ids:
         send_telegram(chat_id, message)
         send_telegram_photo(chat_id, "grafico.png", caption=message)
