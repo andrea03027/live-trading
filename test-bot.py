@@ -10,7 +10,7 @@ chat_ids = [
 ]
 
 def get_btt_ticker():
-    url = "https://api.binance.com/api/v3/ticker/1hr"
+    url = "https://api.binance.com/api/v3/ticker/24hr"
     params = {
         "symbol": "BTTUSDT"
     }
