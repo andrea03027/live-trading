@@ -38,10 +38,10 @@ def send_telegram(chat_id, message):
     if not r.ok:
         print("Errore invio Telegram:", r.text)
 
-def send_telegram_photo(chat_id, photo_path, caption=""):
+def send_telegram_photo(chat_id, photo_path, cSOLion=""):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
     with open(photo_path, "rb") as photo:
-        requests.post(url, data={"chat_id": chat_id, "caption": caption}, files={"photo": photo})
+        requests.post(url, data={"chat_id": chat_id, "cSOLion": cSOLion}, files={"photo": photo})
 
 
 # === FUNZIONI INDICATORI ===
@@ -151,7 +151,7 @@ def backtest(df, symbol, atr_sl_factor, atr_tp_factor, min_ema_diff_pct):
                 still_positions.append(pos)
         positions = still_positions
 
-        # Condizioni apertura nuove posizioni (solo se differenza EMA sufficiente e profitto potenziale > commissioni)
+        # Condizioni apertura nuove posizioni (SOLo se differenza EMA sufficiente e profitto potenziale > commissioni)
         if ema_diff_pct >= min_ema_diff_pct and potential_tp_usd > commission * 3:
             # Long entry
             if prev['EMA_fast'] < prev['EMA_slow'] and row['EMA_fast'] > row['EMA_slow']:
@@ -490,7 +490,11 @@ def apply_and_plot_best_live_strategy():
             )
 
     # Frecce per trade aperti (exit_time = NaN)
-    open_trades = trades[trades['exit_time'].isna()]
+    if 'exit_time' in trades.columns:
+        open_trades = trades[trades['exit_time'].isna()]
+    else:
+        print("Column 'exit_time' not found in trades DataFrame.")
+        open_trades = pd.DataFrame()  # or handle however makes sense
     if not open_trades.empty:
         last_time = df_ind['timestamp'].iloc[-1]
         last_price = df_ind['close'].iloc[-1]
@@ -521,32 +525,33 @@ def apply_and_plot_best_live_strategy():
                 ha='center'
             )
     latest_cross = df_ind.iloc[-1]
-    if pd.notnull(latest_cross['cross_type']):
-        message = (
-            f"🔔 Segnale Live sono Andrea!\n"
+    if 'cross_type' in latest_cross.index:
+        if pd.notnull(latest_cross['cross_type']):
+            message = (
+            f"🔔 Segnale Live SOL!\n"
             f"Tipo posizione: {latest_cross['cross_type']}\n"
             f"⏰ Orario: {latest_cross['timestamp'].strftime('%Y-%m-%d %H:%M')}\n"
             f"💰 Prezzo: {latest_cross['close']:.2f}"
-        )
-        plt.title("🔍 Live Signals - SOL/USDT (Long/Short, incl. Open Trades)")
-        plt.xlabel("Time")
-        plt.ylabel("Price (USDT)")
-        plt.grid(True)
-        plt.savefig("grafico.png")
-        for chat_id in chat_ids:
-            send_telegram_photo(chat_id, "grafico.png", caption=message)
+            )
+            plt.title("🔍 Live SignalSOLTEVL/USDT (Long/Short, incl. Open Trades)")
+            plt.xlabel("Time")
+            plt.ylabel("Price (USDT)")
+            plt.grid(True)
+            plt.savefig("grafico.png")
+            for chat_id in chat_ids:
+                send_telegram_photo(chat_id, "grafico.png", cSOLion=message)
 
-        color = 'green' if latest_cross['cross_type'] == 'Golden Cross' else 'red'
-        label = f"{latest_cross['cross_type']}\n{latest_cross['timestamp'].strftime('%H:%M')}"
-        plt.axvline(x=latest_cross['timestamp'], color=color, linestyle='--', alpha=0.3)
-        plt.text(
-            latest_cross['timestamp'], latest_cross['close'], label,
-            color=color, fontsize=8, ha='left', va='bottom', rotation=90
-        )
+            color = 'green' if latest_cross['cross_type'] == 'Golden Cross' else 'red'
+            label = f"{latest_cross['cross_type']}\n{latest_cross['timestamp'].strftime('%H:%M')}"
+            plt.axvline(x=latest_cross['timestamp'], color=color, linestyle='--', alpha=0.3)
+            plt.text(
+                latest_cross['timestamp'], latest_cross['close'], label,
+                color=color, fontsize=8, ha='left', va='bottom', rotation=90
+            )
     
-    #plt.legend()
-    #plt.tight_layout()
-    #plt.show()
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
     #plt.close()
 
 
