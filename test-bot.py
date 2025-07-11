@@ -10,6 +10,7 @@ import requests
 
 # === PARAMETRI INIZIALI ===
 symbols = ['SOL/USDT']
+monete = ['SOL'] 
 timeframe = '1h'
 capital_per_trade = 5000
 commission = 6.0
@@ -38,10 +39,10 @@ def send_telegram(chat_id, message):
     if not r.ok:
         print("Errore invio Telegram:", r.text)
 
-def send_telegram_photo(chat_id, photo_path, cSOLion=""):
+def send_telegram_photo(chat_id, photo_path, caption):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
     with open(photo_path, "rb") as photo:
-        requests.post(url, data={"chat_id": chat_id, "cSOLion": cSOLion}, files={"photo": photo})
+        requests.post(url, data={"chat_id": chat_id, "caption": caption}, files={"photo": photo})
 
 
 # === FUNZIONI INDICATORI ===
@@ -311,7 +312,8 @@ def main():
             # Salva strategia vincente in CSV cumulativo
             df_results.to_csv(os.path.join(base_folder, "all_monthly_results.csv"), mode='a', header=not os.path.exists(os.path.join(base_folder, "all_monthly_results.csv")), index=False)
 
-def load_strategies_from_csv(path="results_SOL/all_monthly_results.csv"):
+def load_strategies_from_csv(moneta):
+    path = f"results_{moneta}/all_monthly_results.csv"
     df = pd.read_csv(path)
     grouped = df.groupby(['ema_fast_len', 'ema_slow_len', 'rsi_len', 'atr_period', 'atr_sl_factor', 'atr_tp_factor']).mean(numeric_only=True)
     return grouped.reset_index()
@@ -361,12 +363,12 @@ def test_strategies_live(df_live, strategies_df, symbol):
 
     return pd.DataFrame(results).sort_values(by="total_profit_usd", ascending=False)
 
-def evaluate_best_live_strategy():
-    symbol = 'SOL/USDT'
-    strategies_df = load_strategies_from_csv()
+def evaluate_best_live_strategy(moneta):
+    symbol = f"{moneta}/USDT"
+    strategies_df = load_strategies_from_csv(moneta)
     df_live = fetch_live_data(symbol)
     
-    print("Testing strategies on live data...")
+    print(f"{moneta} - Testing strategies on live data")
     ranked = test_strategies_live(df_live, strategies_df, symbol)
     
     print("\n📈 Top strategy to apply now:")
@@ -374,10 +376,10 @@ def evaluate_best_live_strategy():
 
     return ranked
 
-def apply_and_plot_best_live_strategy():
+def apply_and_plot_best_live_strategy(moneta):
 
     # Carica la strategia migliore live
-    path = "results_SOL/live_strategy_ranking.csv"
+    path = f"results_{moneta}/all_monthly_results.csv"
     if not os.path.exists(path):
         print("⚠️ File live_strategy_ranking.csv non trovato.")
         return
@@ -392,7 +394,7 @@ def apply_and_plot_best_live_strategy():
     print(best)
 
     # Fetch live data
-    symbol = 'SOL/USDT'
+    symbol = f"{moneta}/USDT"
     df_live = fetch_live_data(symbol)
 
     # Calcolo indicatori
@@ -528,12 +530,12 @@ def apply_and_plot_best_live_strategy():
     if 'cross_type' in latest_cross.index:
         if pd.notnull(latest_cross['cross_type']):
             message = (
-            f"🔔 Segnale Live SOL!\n"
+            f"🔔 Segnale Live {moneta}!\n"
             f"Tipo posizione: {latest_cross['cross_type']}\n"
             f"⏰ Orario: {latest_cross['timestamp'].strftime('%Y-%m-%d %H:%M')}\n"
             f"💰 Prezzo: {latest_cross['close']:.2f}"
             )
-            plt.title("🔍 Live SignalSOLTEVL/USDT (Long/Short, incl. Open Trades)")
+            plt.title(f"🔍 Live Signal {moneta}/USDT (Long/Short, incl. Open Trades)")
             plt.xlabel("Time")
             plt.ylabel("Price (USDT)")
             plt.grid(True)
@@ -548,17 +550,34 @@ def apply_and_plot_best_live_strategy():
                 latest_cross['timestamp'], latest_cross['close'], label,
                 color=color, fontsize=8, ha='left', va='bottom', rotation=90
             )
+        else:
+            plt.title(f"🔍 Live Signal {moneta}/USDT (Long/Short, incl. Open Trades)")
+            plt.xlabel("Time")
+            plt.ylabel("Price (USDT)")
+            plt.grid(True)
+            plt.savefig("grafico.png")
+            for chat_id in chat_ids:
+                send_telegram_photo(chat_id, "grafico.png", caption=f"{moneta} - No Signal")
+    else:
+        plt.title(f"🔍 Live Signal {moneta}/USDT (Long/Short, incl. Open Trades)")
+        plt.xlabel("Time")
+        plt.ylabel("Price (USDT)")
+        plt.grid(True)
+        plt.savefig("grafico.png")
+        for chat_id in chat_ids:
+            send_telegram_photo(chat_id, "grafico.png", caption=f"{moneta} - No Signal")
     
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+    #plt.legend()
+    #plt.tight_layout()
+    #plt.show()
     #plt.close()
 
 
 if __name__ == "__main__":
     while True:
-        ranked_live = evaluate_best_live_strategy()
-        ranked_live.to_csv("results_SOL/live_strategy_ranking.csv", index=False)
-        apply_and_plot_best_live_strategy()
+        for moneta in monete:
+            ranked_live = evaluate_best_live_strategy(moneta)
+            ranked_live.to_csv(f"results_{moneta}/live_strategy_ranking.csv", index=False)
+            apply_and_plot_best_live_strategy(moneta)
         print("Attesa 15 minuti per il prossimo aggiornamento...\n")
         time.sleep(900)
